@@ -1,0 +1,250 @@
+--[[
+🐣 JeabDestiny Of FPS (No-Lock version)
+- ปุ่มตั้งค่า FPS: 5 / 10 / 15 / 30 / 60 / 144
+- FPS Counter อยู่ใน UI
+- เปิด/ปิด UI ด้วยโลโก้มุมซ้ายล่างเท่านั้น (ไม่มีปุ่มใน UI)
+- ปุ่มลัด RightShift เปิด/ปิด UI ได้ด้วย
+- โลโก้มีเอฟเฟกต์เด้งเบาๆ ตอนชี้ 🐥
+]]--
+
+-- กันซ้ำ
+local player = game:GetService("Players").LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+if playerGui:FindFirstChild("FPSController") then
+    playerGui.FPSController:Destroy()
+end
+
+-- ตรวจ executor
+local hasSet = typeof(setfpscap) == "function"
+local hasGet = typeof(getfpscap) == "function"
+
+-- ค่าตั้งต้น
+local currentCap = (hasGet and getfpscap()) or 60
+
+-- ====== ScreenGui ======
+local gui = Instance.new("ScreenGui")
+gui.Name = "FPSController"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.Parent = playerGui
+
+-- ====== แผงหลัก ======
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = UDim2.new(0, 300, 0, 220)
+main.Position = UDim2.new(0, 30, 0, 60)
+main.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+main.Parent = gui
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+local stroke = Instance.new("UIStroke", main)
+stroke.Color = Color3.fromRGB(255, 215, 100)
+stroke.Thickness = 1.6
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- หัวข้อ + ลากได้
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -24, 0, 36)
+title.Position = UDim2.new(0, 12, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "JeabDestiny Of FPS"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 230, 140)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = main
+
+do
+    local dragging, dragInput, dragStart, startPos
+    local UIS = game:GetService("UserInputService")
+    title.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    title.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+-- เส้นแบ่ง
+local sep = Instance.new("Frame")
+sep.Size = UDim2.new(1, -24, 0, 1)
+sep.Position = UDim2.new(0, 12, 0, 46)
+sep.BackgroundColor3 = Color3.fromRGB(70, 70, 78)
+sep.Parent = main
+
+-- แถวสถานะ: Cap + FPS
+local statusRow = Instance.new("Frame")
+statusRow.Size = UDim2.new(1, -24, 0, 28)
+statusRow.Position = UDim2.new(0, 12, 0, 54)
+statusRow.BackgroundTransparency = 1
+statusRow.Parent = main
+
+local capLabel = Instance.new("TextLabel")
+capLabel.Size = UDim2.new(0.5, -6, 1, 0)
+capLabel.Position = UDim2.new(0, 0, 0, 0)
+capLabel.BackgroundTransparency = 1
+capLabel.Font = Enum.Font.Gotham
+capLabel.TextSize = 14
+capLabel.TextXAlignment = Enum.TextXAlignment.Left
+capLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+capLabel.Parent = statusRow
+
+local fpsLabel = Instance.new("TextLabel")
+fpsLabel.Size = UDim2.new(0.5, -6, 1, 0)
+fpsLabel.Position = UDim2.new(0.5, 6, 0, 0)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.TextSize = 16
+fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
+fpsLabel.TextColor3 = Color3.fromRGB(255, 220, 80) -- เหลืองคิ้วท์ๆ
+fpsLabel.Text = "FPS: ..."
+fpsLabel.Parent = statusRow
+
+local function refreshStatus()
+    local capTxt = hasGet and tostring(getfpscap()) or tostring(currentCap)
+    local supportTxt = hasSet and "" or " (⚠️ ไม่มี setfpscap)"
+    capLabel.Text = string.format("Cap: %s FPS%s", capTxt, supportTxt)
+end
+
+-- กล่องปุ่ม Preset
+local presetsFrame = Instance.new("Frame")
+presetsFrame.Size = UDim2.new(1, -24, 0, 120)
+presetsFrame.Position = UDim2.new(0, 12, 0, 92)
+presetsFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 42)
+Instance.new("UICorner", presetsFrame).CornerRadius = UDim.new(0, 10)
+presetsFrame.Parent = main
+
+local grid = Instance.new("UIGridLayout", presetsFrame)
+grid.CellSize = UDim2.new(0, 86, 0, 32)
+grid.CellPadding = UDim2.new(0, 8, 0, 8)
+grid.FillDirectionMaxCells = 3
+grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+grid.VerticalAlignment = Enum.VerticalAlignment.Center
+
+-- ทำปุ่ม preset และไฮไลต์ปุ่มที่เลือก
+local presetValues = {5, 10, 15, 30, 60, 144}
+local buttons = {}
+
+local function updateSelectedButton()
+    for value, btn in pairs(buttons) do
+        if value == currentCap then
+            btn.BackgroundColor3 = Color3.fromRGB(255, 230, 140)
+            btn.TextColor3 = Color3.fromRGB(40, 30, 10)
+            btn.Text = tostring(value).." FPS ✓"
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(255, 220, 120)
+            btn.TextColor3 = Color3.fromRGB(60, 40, 10)
+            btn.Text = tostring(value).." FPS"
+        end
+    end
+end
+
+local function makePresetButton(value)
+    local b = Instance.new("TextButton")
+    b.Text = tostring(value).." FPS"
+    b.Font = Enum.Font.GothamSemibold
+    b.TextSize = 14
+    b.BackgroundColor3 = Color3.fromRGB(255, 220, 120)
+    b.TextColor3 = Color3.fromRGB(60, 40, 10)
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+    b.Parent = presetsFrame
+    buttons[value] = b
+    b.MouseButton1Click:Connect(function()
+        currentCap = value
+        if hasSet then pcall(setfpscap, currentCap) end
+        refreshStatus()
+        updateSelectedButton()
+    end)
+end
+for _,v in ipairs(presetValues) do makePresetButton(v) end
+updateSelectedButton()
+
+-- FPS Counter (อัปเดตเลข)
+do
+    local RunService = game:GetService("RunService")
+    local lastUpdate = tick()
+    local frames = 0
+    RunService.RenderStepped:Connect(function()
+        frames += 1
+        if tick() - lastUpdate >= 1 then
+            fpsLabel.Text = "FPS: " .. tostring(frames)
+            frames = 0
+            lastUpdate = tick()
+        end
+    end)
+end
+
+-- วนย้ำค่า cap
+task.spawn(function()
+    while gui.Parent do
+        if hasSet then pcall(setfpscap, currentCap) end
+        task.wait(1)
+        refreshStatus()
+    end
+end)
+
+-- ====== โลโก้มุมซ้ายล่างเปิด/ปิด UI ======
+local dock = Instance.new("ImageButton")
+dock.Name = "JeabDock"
+dock.Size = UDim2.new(0, 56, 0, 56)
+dock.AnchorPoint = Vector2.new(0, 1)
+dock.Position = UDim2.new(0, 20, 1, -20)
+dock.BackgroundTransparency = 1
+dock.AutoButtonColor = false
+dock.Image = "rbxassetid://72865689357102" -- ✅ โลโก้ JeabJeab ที่ใช้ได้จริง
+dock.Parent = gui
+dock.ScaleType = Enum.ScaleType.Fit
+
+-- เส้นขอบ
+local dstroke = Instance.new("UIStroke")
+dstroke.Thickness = 1.2
+dstroke.Color = Color3.fromRGB(255, 230, 140)
+dstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+dstroke.Parent = dock
+Instance.new("UICorner", dock).CornerRadius = UDim.new(0, 12)
+
+-- เอฟเฟกต์เด้งเบา ๆ ตอนเอาเมาส์ชี้
+dock.MouseEnter:Connect(function()
+    game:GetService("TweenService"):Create(
+        dock, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {Size = UDim2.new(0, 62, 0, 62)}
+    ):Play()
+end)
+dock.MouseLeave:Connect(function()
+    game:GetService("TweenService"):Create(
+        dock, TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+        {Size = UDim2.new(0, 56, 0, 56)}
+    ):Play()
+end)
+
+-- เปิด/ปิด UI
+dock.MouseButton1Click:Connect(function()
+    main.Visible = not main.Visible
+end)
+
+-- ปุ่มลัด RightShift เปิด/ปิด
+do
+    local UIS = game:GetService("UserInputService")
+    UIS.InputBegan:Connect(function(input, gp)
+        if gp then return end
+        if input.KeyCode == Enum.KeyCode.RightShift then
+            main.Visible = not main.Visible
+        end
+    end)
+end
+
+-- เริ่มต้น
+if hasSet then pcall(setfpscap, currentCap) end
+refreshStatus()
