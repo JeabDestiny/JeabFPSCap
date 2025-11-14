@@ -1,21 +1,20 @@
--- JeabDestiny Hub (FPS Tools) + Auto Anti-AFK — by JeabStyle งับ
--- รวม: FPS Lock + FPS Counter + FPS Booster + Anti-AFK อัตโนมัติ
+-- 🐣 JeabDestiny Of FPS (Ultimate Edition)
+-- รวม: FPS Lock + FPS Counter + ดินน้ำมัน + FPS Booster ในสคริปต์เดียว
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local VirtualUser = game:GetService("VirtualUser")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ลบ GUI เก่าเพื่อป้องกันการซ้ำ
+-- ลบของเก่ากันซ้ำ
 if playerGui:FindFirstChild("JeabDestinyUI") then
 	playerGui.JeabDestinyUI:Destroy()
 end
 
--- ตัวแปรพื้นฐาน
+-- 🪄 ตัวแปรพื้นฐาน
 local currentCap = (getfpscap and getfpscap()) or 60
 local gui = Instance.new("ScreenGui", playerGui)
 gui.Name = "JeabDestinyUI"
@@ -24,9 +23,9 @@ gui.ResetOnSpawn = false
 gui.DisplayOrder = 999999
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Main Panel
+-- 🪟 Main Panel
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 360, 0, 320)
+main.Size = UDim2.new(0, 320, 0, 300)
 main.Position = UDim2.new(0, 30, 0, 60)
 main.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
@@ -34,18 +33,18 @@ local stroke = Instance.new("UIStroke", main)
 stroke.Color = Color3.fromRGB(255, 215, 100)
 stroke.Thickness = 1.4
 
--- Title (ลากได้)
+-- 🔸 Title
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, -20, 0, 36)
 title.Position = UDim2.new(0, 10, 0, 8)
 title.BackgroundTransparency = 1
-title.Text = "JeabDestiny Hub"
+title.Text = "JeabDestiny Of FPS"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(255, 230, 140)
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Drag logic
+-- ลากได้
 do
 	local dragging, dragStart, startPos
 	title.InputBegan:Connect(function(input)
@@ -66,7 +65,7 @@ do
 	end)
 end
 
--- FPS Counter
+-- 🟡 FPS Counter
 local fpsLabel = Instance.new("TextLabel", main)
 fpsLabel.Size = UDim2.new(1, -20, 0, 30)
 fpsLabel.Position = UDim2.new(0, 10, 0, 50)
@@ -80,18 +79,17 @@ fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
 -- FPS Update
 local last, frames = tick(), 0
 RunService.RenderStepped:Connect(function()
-	frames = frames + 1
+	frames += 1
 	if tick() - last >= 1 then
-		pcall(function() fpsLabel.Text = "FPS: " .. frames end)
+		fpsLabel.Text = "FPS: " .. frames
 		frames = 0
 		last = tick()
 	end
 end)
 
--- FPS Cap Buttons
+-- 🔹 ปุ่ม FPS CAP
 local presetValues = {5, 10, 15, 30, 60, 144}
 local buttons = {}
-
 local buttonFrame = Instance.new("Frame", main)
 buttonFrame.Size = UDim2.new(1, -20, 0, 120)
 buttonFrame.Position = UDim2.new(0, 10, 0, 90)
@@ -99,7 +97,7 @@ buttonFrame.BackgroundColor3 = Color3.fromRGB(36, 36, 42)
 Instance.new("UICorner", buttonFrame).CornerRadius = UDim.new(0, 10)
 
 local grid = Instance.new("UIGridLayout", buttonFrame)
-grid.CellSize = UDim2.new(0, 100, 0, 34)
+grid.CellSize = UDim2.new(0, 90, 0, 32)
 grid.CellPadding = UDim2.new(0, 8, 0, 8)
 grid.FillDirectionMaxCells = 3
 grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -127,8 +125,8 @@ for _, v in ipairs(presetValues) do
 	b.TextColor3 = Color3.fromRGB(60, 40, 10)
 	b.Text = v .. " FPS"
 	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
-
 	buttons[v] = b
+
 	b.MouseButton1Click:Connect(function()
 		currentCap = v
 		if setfpscap then pcall(setfpscap, v) end
@@ -137,7 +135,7 @@ for _, v in ipairs(presetValues) do
 end
 updateButtons()
 
--- FPS Booster
+-- 🔸 FPS Booster Function (จาก RIP#6666)
 local function ApplyFPSBooster()
 	local Settings = {
 		["No Particles"] = true,
@@ -149,13 +147,13 @@ local function ApplyFPSBooster()
 	}
 
 	for _, obj in pairs(workspace:GetDescendants()) do
-		if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+		if Settings["No Particles"] and (obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")) then
 			obj.Enabled = false
-		elseif obj:IsA("Explosion") then
+		elseif Settings["No Explosions"] and obj:IsA("Explosion") then
 			obj.Visible = false
-		elseif obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic") then
+		elseif Settings["No Clothes"] and (obj:IsA("Shirt") or obj:IsA("Pants") or obj:IsA("ShirtGraphic")) then
 			obj:Destroy()
-		elseif obj:IsA("BasePart") then
+		elseif Settings["Low Quality Parts"] and obj:IsA("BasePart") then
 			obj.Material = Enum.Material.SmoothPlastic
 			obj.Reflectance = 0
 		elseif obj:IsA("Decal") or obj:IsA("Texture") then
@@ -163,21 +161,24 @@ local function ApplyFPSBooster()
 		end
 	end
 
-	Lighting.GlobalShadows = false
-	local t = workspace:FindFirstChildOfClass("Terrain")
-	if t then
+	if Settings["No Shadows"] then
+		Lighting.GlobalShadows = false
+	end
+	if Settings["Low Water Graphics"] and workspace:FindFirstChildOfClass("Terrain") then
+		local t = workspace:FindFirstChildOfClass("Terrain")
 		t.WaterWaveSize = 0
 		t.WaterWaveSpeed = 0
 		t.WaterTransparency = 1
 		t.WaterReflectance = 0
 	end
 
-	print("✅ FPS Booster Activated")
+	print("✅ FPS Booster Activated (JeabDestiny)")
 end
 
+-- ปุ่มเปิด FPS Booster
 local boostBtn = Instance.new("TextButton", main)
-boostBtn.Size = UDim2.new(0, 160, 0, 38)
-boostBtn.Position = UDim2.new(0.5, -80, 0, 220)
+boostBtn.Size = UDim2.new(0, 140, 0, 38)
+boostBtn.Position = UDim2.new(0.5, -70, 0, 230)
 boostBtn.Text = "เปิดโหมด FPS Booster"
 boostBtn.Font = Enum.Font.GothamBold
 boostBtn.TextSize = 14
@@ -189,41 +190,7 @@ boostBtn.MouseButton1Click:Connect(function()
 	boostBtn.BackgroundColor3 = Color3.fromRGB(70, 200, 120)
 end)
 
--- Anti-AFK (Auto)
-local afkFrame = Instance.new("Frame", main)
-afkFrame.Size = UDim2.new(1, -20, 0, 40)
-afkFrame.Position = UDim2.new(0, 10, 0, 266)
-afkFrame.BackgroundTransparency = 1
-
-local afkDot = Instance.new("Frame", afkFrame)
-afkDot.Size = UDim2.new(0, 12, 0, 12)
-afkDot.Position = UDim2.new(0, 6, 0, 4)
-Instance.new("UICorner", afkDot).CornerRadius = UDim.new(1, 0)
-afkDot.BackgroundColor3 = Color3.fromRGB(80, 200, 120) -- เขียว
-
-local afkLabel = Instance.new("TextLabel", afkFrame)
-afkLabel.Size = UDim2.new(1, -28, 1, 0)
-afkLabel.Position = UDim2.new(0, 28, 0, 0)
-afkLabel.BackgroundTransparency = 1
-afkLabel.Font = Enum.Font.Gotham
-afkLabel.TextSize = 14
-afkLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-afkLabel.TextXAlignment = Enum.TextXAlignment.Left
-afkLabel.Text = "Anti-AFK: ทำงานอัตโนมัติ"
-
-player.Idled:Connect(function()
-	afkLabel.Text = "Anti-AFK: ป้องกันการเตะอยู่..."
-	afkDot.BackgroundColor3 = Color3.fromRGB(255, 180, 60)
-	pcall(function()
-		VirtualUser:CaptureController()
-		VirtualUser:ClickButton2(Vector2.new(0,0))
-	end)
-	wait(1.2)
-	afkLabel.Text = "Anti-AFK: ทำงานอัตโนมัติ"
-	afkDot.BackgroundColor3 = Color3.fromRGB(80, 200, 120)
-end)
-
--- Dock Button (มุมล่างซ้าย)
+-- 🐥 โลโก้มุมซ้ายล่างเปิด/ปิด
 local dock = Instance.new("ImageButton", gui)
 dock.Size = UDim2.new(0, 56, 0, 56)
 dock.AnchorPoint = Vector2.new(0, 1)
@@ -232,7 +199,6 @@ dock.BackgroundTransparency = 1
 dock.Image = "rbxassetid://72865689357102"
 dock.ScaleType = Enum.ScaleType.Fit
 Instance.new("UICorner", dock).CornerRadius = UDim.new(0, 12)
-
 local dStroke = Instance.new("UIStroke", dock)
 dStroke.Thickness = 1.2
 dStroke.Color = Color3.fromRGB(255, 230, 140)
@@ -246,5 +212,3 @@ end)
 dock.MouseButton1Click:Connect(function()
 	main.Visible = not main.Visible
 end)
-
-print("✅ JeabDestiny Hub Loaded (FPS + Auto Anti-AFK)")
